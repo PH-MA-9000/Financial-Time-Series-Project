@@ -38,6 +38,8 @@ gurk <- data[,3]
 
 miss <- which(is.na(gurk[1:(length(gurk) - 200)]))
 
+nainterpolated <- approx(c(miss[1]-1, miss[length(miss)] + 1), c(gurk[miss[1]-1], gurk[miss[length(miss)] + 1]), xout = (miss[1]-1):(miss[length(miss)] + 1))
+nostartendinterpgurk <- nainterpolated$y[-c(1,length(nainterpolated))]
 
 interpresids <- data.frame(NA)
 k <- 0
@@ -45,7 +47,7 @@ set.seed(1234)
 par(mfrow=c(1,1))
 plot.ts(gurk)
 interpnames <- c()
-for (i in c(seq(from = 52, to = miss[length(miss)], by = 1), seq(from = (miss[length(miss)]+1), to = (length(gurk) - 200), by = 1) ) ) {
+for (i in c(seq(from = 52, to = miss[length(miss)], by = 51), seq(from = (miss[length(miss)]+1), to = (length(gurk) - 200), by = 51) ) ) {
   if (i %in% (miss[1]):(miss[length(miss)] + 51)  ) {
     next
   }
@@ -60,33 +62,23 @@ interpresids <- interpresids[,-1]
 names(interpresids) <- interpnames
 
 bootmeans <- list()
-bootmeanvar <- c()
+#bootmeanvar <- c()
 meanofboots <- c()
+upperci <- c()
+lowerci <- c()
+n <- 1000
 for (i in 1:50) {
-  bootmeans[[i]] <- bootstrapmeans(as.numeric(interpresids[i,]), 10000)
-  bootmeanvar <- c(bootmeanvar, var(bootmeans[[i]]))
+  bootmeans[[i]] <- sort(bootstrapmeans(as.numeric(interpresids[i,]), n))
+  #bootmeanvar <- c(bootmeanvar, var(bootmeans[[i]]))
   meanofboots <- c(meanofboots, mean(bootmeans[[i]]))
+  lowerci <- c(lowerci, bootmeans[[i]][0.025*n])
+  upperci <- c(upperci, bootmeans[[i]][0.975*n])
   print(paste0("iter", i))
 }
-hist(bootmeans[[1]], breaks = 50)
 
-upperci <- meanofboots + 1.96*sqrt(bootmeanvar)
-lowerci <- meanofboots - 1.96*sqrt(bootmeanvar)
-
-
-
-set.seed(1234)
-testboot <- bootstrapmeans(interpresids[,25], 10000)
-hist(testboot, breaks = 50)
-var(testboot)
-win.graph()
-par(mfrow = c(2,2))
-for (mn in bootmeans) {
-  hist(mn, breaks = 50)
-}
-
-
-
-set.seed(100967)
-sample(interpresids[[1]], size = length(interpresids[[1]]) ,replace = TRUE)
-
+exptrueupper <- nostartendinterpgurk - lowerci
+exptruelower <- nostartendinterpgurk - upperci
+plot.ts(gurk)
+lines(miss,nostartendinterpgurk - meanofboots, col = "red")
+lines(miss,exptrueupper, col = "blue")
+lines(miss,exptruelower, col = "blue")
