@@ -45,14 +45,14 @@ set.seed(1234)
 par(mfrow=c(1,1))
 plot.ts(gurk)
 interpnames <- c()
-for (i in c(seq(from = 50, to = miss[length(miss)], by = 49), seq(from = (miss[length(miss)]+1), to = (length(gurk) - 200), by = 49) ) ) {
-  if (i %in% (miss[1]):(miss[length(miss)] + 49)  ) {
+for (i in c(seq(from = 52, to = miss[length(miss)], by = 1), seq(from = (miss[length(miss)]+1), to = (length(gurk) - 200), by = 1) ) ) {
+  if (i %in% (miss[1]):(miss[length(miss)] + 51)  ) {
     next
   }
   k <- k + 1
-  interp <- approx(c(i-49,i),c(gurk[i-49],gurk[i]))
+  interp <- approx(c(i-51,i),c(gurk[i-51],gurk[i]), xout = (i-51):i)
   lines(interp, col = "red")
-  interpresids <- cbind(interpresids, (interp$y[-c(1,length(interp$y))] - gurk[(i-49 + 1):(i - 1)]))
+  interpresids <- cbind(interpresids, (interp$y[-c(1,length(interp$y))] - gurk[(i-51 + 1):(i - 1)]))
   interpnames <- c(interpnames, paste0("interpolation ", k))
 }
 
@@ -62,12 +62,13 @@ names(interpresids) <- interpnames
 bootmeans <- list()
 bootmeanvar <- c()
 meanofboots <- c()
-for (i in 1:48) {
-  bootmeans[[i]] <- bootstrapmeans(interpresids[,i], 10000)
+for (i in 1:50) {
+  bootmeans[[i]] <- bootstrapmeans(as.numeric(interpresids[i,]), 10000)
   bootmeanvar <- c(bootmeanvar, var(bootmeans[[i]]))
   meanofboots <- c(meanofboots, mean(bootmeans[[i]]))
+  print(paste0("iter", i))
 }
-
+hist(bootmeans[[1]], breaks = 50)
 
 upperci <- meanofboots + 1.96*sqrt(bootmeanvar)
 lowerci <- meanofboots - 1.96*sqrt(bootmeanvar)
