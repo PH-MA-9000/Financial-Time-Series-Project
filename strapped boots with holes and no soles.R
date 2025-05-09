@@ -22,7 +22,7 @@ bootstrapmeans <- function(samp, n) {
 }
 #Taking logs of data
 data <- ts(data)
-data[,-c(1,2)] <- log(data[,-c(1,2)])
+data[,-c(1,2)] <- log(data[,-c(1,2)])    #do we want to interpolate the logvalues or actual values?
 
 plot.ts(data)
 
@@ -79,10 +79,17 @@ for (i in 1:50) {
 
 exptrueupper <- nostartendinterptmpdata - lowerci
 exptruelower <- nostartendinterptmpdata - upperci
-plot.ts(tmpdata, xlim = c(miss[1] - 50, miss[length(miss)] + 50), ylim = c(max(tmpdata[(miss[1] - 50):(miss[length(miss)] + 50)], na.rm = TRUE), min(tmpdata[(miss[1] - 50):(miss[length(miss)] + 50)],na.rm = TRUE)))
-lines(miss,nostartendinterptmpdata - meanofboots, col = "red")
-lines(miss,exptrueupper, col = "blue")
-lines(miss,exptruelower, col = "blue")
+
+newimputation <- nostartendinterptmpdata- meanofboots
+data[miss,ts] <- newimputation
+
+plot.ts(exp(tmpdata), xlim = c(miss[1] - 50, miss[length(miss)] + 50), ylim = c(exp(min(tmpdata[(miss[1] - 50):(miss[length(miss)] + 50)], na.rm = TRUE)),exp(max(tmpdata[(miss[1] - 50):(miss[length(miss)] + 50)], na.rm = TRUE))))
+lines(miss,exp(newimputation), col = "red")
+lines(miss,exp(exptrueupper), col = "blue")
+lines(miss,exp(exptruelower), col = "blue")
 
 }
+
+
+plot.ts(data[,3], xlim = c(150,300), ylim = c(1.8,1.95))
 
