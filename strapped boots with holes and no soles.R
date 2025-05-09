@@ -33,28 +33,29 @@ for (i in c(36,1194,2836,3430,4118)) {
 
 plot.ts(data)
 
+for (ts in 3:9) {
 
-gurk <- data[,3]
+tmpdata <- data[,ts]
 
-miss <- which(is.na(gurk[1:(length(gurk) - 200)]))
+miss <- which(is.na(tmpdata[1:(length(tmpdata) - 200)]))
 
-nainterpolated <- approx(c(miss[1]-1, miss[length(miss)] + 1), c(gurk[miss[1]-1], gurk[miss[length(miss)] + 1]), xout = (miss[1]-1):(miss[length(miss)] + 1))
-nostartendinterpgurk <- nainterpolated$y[-c(1,length(nainterpolated))]
+nainterpolated <- approx(c(miss[1]-1, miss[length(miss)] + 1), c(tmpdata[miss[1]-1], tmpdata[miss[length(miss)] + 1]), xout = (miss[1]-1):(miss[length(miss)] + 1))
+nostartendinterptmpdata <- nainterpolated$y[-c(1,length(nainterpolated))]
 
 interpresids <- data.frame(NA)
 k <- 0
 set.seed(1234)
 par(mfrow=c(1,1))
-plot.ts(gurk)
+plot.ts(tmpdata)
 interpnames <- c()
-for (i in c(seq(from = 52, to = miss[length(miss)], by = 51), seq(from = (miss[length(miss)]+1), to = (length(gurk) - 200), by = 51) ) ) {
+for (i in c(seq(from = 52, to = miss[length(miss)], by = 51), seq(from = (miss[length(miss)]+1), to = (length(tmpdata) - 200), by = 51) ) ) {
   if (i %in% (miss[1]):(miss[length(miss)] + 51)  ) {
     next
   }
   k <- k + 1
-  interp <- approx(c(i-51,i),c(gurk[i-51],gurk[i]), xout = (i-51):i)
+  interp <- approx(c(i-51,i),c(tmpdata[i-51],tmpdata[i]), xout = (i-51):i)
   lines(interp, col = "red")
-  interpresids <- cbind(interpresids, (interp$y[-c(1,length(interp$y))] - gurk[(i-51 + 1):(i - 1)]))
+  interpresids <- cbind(interpresids, (interp$y[-c(1,length(interp$y))] - tmpdata[(i-51 + 1):(i - 1)]))
   interpnames <- c(interpnames, paste0("interpolation ", k))
 }
 
@@ -76,9 +77,12 @@ for (i in 1:50) {
   print(paste0("iter", i))
 }
 
-exptrueupper <- nostartendinterpgurk - lowerci
-exptruelower <- nostartendinterpgurk - upperci
-plot.ts(gurk)
-lines(miss,nostartendinterpgurk - meanofboots, col = "red")
+exptrueupper <- nostartendinterptmpdata - lowerci
+exptruelower <- nostartendinterptmpdata - upperci
+plot.ts(tmpdata, xlim = c(miss[1] - 50, miss[length(miss)] + 50), ylim = c(max(tmpdata[(miss[1] - 50):(miss[length(miss)] + 50)], na.rm = TRUE), min(tmpdata[(miss[1] - 50):(miss[length(miss)] + 50)],na.rm = TRUE)))
+lines(miss,nostartendinterptmpdata - meanofboots, col = "red")
 lines(miss,exptrueupper, col = "blue")
 lines(miss,exptruelower, col = "blue")
+
+}
+
