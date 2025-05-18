@@ -38,7 +38,7 @@ par(mfrow=c(1,1))
 plot.ts(tmpdata, xlim = c(0, miss[1]), ylim = c(min(tmpdata[1:(miss[1] - 1)]), max(tmpdata[1:(miss[1] - 1)])), ylab = "interpolated vs real")
 interpnames <- c()
 
-#Doing linear interpolations on different parts of data & computing residuaös
+#Doing linear interpolations on different parts of data & computing residuals
 for (i in c(seq(from = 52, to = miss[length(miss)], by = 51), seq(from = (miss[length(miss)]+1), to = (length(tmpdata) - 200), by = 51) ) ) {
   if (i %in% (miss[1]):(miss[length(miss)] + 51)  ) {
     next
